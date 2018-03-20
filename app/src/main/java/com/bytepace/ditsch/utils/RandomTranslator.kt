@@ -13,21 +13,21 @@ class RandomTranslator {
             "si", "mrj", "sk", "el", "sl", "ka", "sw", "gu", "su", "da", "tg", "he", "th", "yi",
             "tl", "id", "ta", "ga", "tt", "it", "te", "is", "tr", "es", "udm", "kk", "uz", "kn",
             "uk", "ca", "ur", "ky", "fi", "zh", "fr", "ko", "hi", "xh", "hr", "km", "cs", "lo",
-            "sv", "la", "gd", "lv", "et", "lt", "eo", "lb", "jv", "mg", "ja", "ms")
+            "sv", "la", "gd", "lv", "et", "lt", "eo", "lb", "jv", "mg", "ja", "ms", "ru")
 
     fun makeRandomTranslateChain(sourceText: String, chainLength: Int, defaultLang: String): String {
-        val startLang = if (defaultLang in allLangs){
+        val startLang = if (defaultLang in allLangs) {
             defaultLang
-        }else{
+        } else {
             "en"
         }
         val langChain = createRandomLangChain(chainLength)
         val translateAPI = YandexTranslateApiImpl()
-        var result = translateAPI.translate(sourceText, "${startLang}-${langChain[0]}")
+        var result = translateAPI.translate(sourceText, "$startLang-${langChain[0]}")
         for (i in 0 until chainLength) {
             result = translateAPI.translate(result, "${langChain[i]}-${langChain[i + 1]}")
         }
-        return translateAPI.translate(result, "${langChain.last()}-${startLang}")
+        return translateAPI.translate(result, "${langChain.last()}-$startLang")
     }
 
     private fun createRandomLangChain(chainLength: Int): ArrayList<String> {

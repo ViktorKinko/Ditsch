@@ -17,16 +17,22 @@ class YandexTranslateApiImpl {
             .build()
     private var api: YandexTranslateApi = retrofit.create(YandexTranslateApi::class.java)
 
-    public fun translate(text: String, lang: String): String {
+    fun translate(text: String, lang: String): String {
         val call: Call<Translation> = api.translate(API_KEY, lang, text)
         val t: Translation = execute(call)
-        return t.text[0]
+        t.text ?: return "No response"
+        return if (t.text.size == 0) {
+            return "No translation"
+        } else {
+            t.text[0]
+        }
     }
 
     private fun <T> execute(call: Call<T>): Translation {
         try {
             val response = call.execute()
             response ?: return Translation()
+            response.body() ?: return Translation()
             return response.body() as Translation
         } catch (e: IOException) {
             e.printStackTrace()
