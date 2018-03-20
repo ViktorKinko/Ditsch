@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Ditsch</string>
+    <string name="translate">Перевести</string>
+    <string name="leave_empty">Оставьте пустым для случайной строки</string>
+    <string name="chain_size">Размер цепи переводов</string>
+    <string name="transition_main_to_detail">main to detail</string>
+    <string name="delete">Delete</string>
+</resources>
