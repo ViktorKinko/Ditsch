@@ -20,7 +20,7 @@ abstract class HistoryDatabase : RoomDatabase() {
         fun getInstance(context: Context): HistoryDatabase {
             if (INSTANCE == null) {
                 synchronized(Database::class) {
-                    INSTANCE = Room.databaseBuilder(context.applicationContext, HistoryDatabase::class.java, "history.db").allowMainThreadQueries().build()
+                    INSTANCE = Room.databaseBuilder(context, HistoryDatabase::class.java, "history.db").allowMainThreadQueries().build()
                 }
             }
             return INSTANCE as HistoryDatabase
@@ -28,6 +28,33 @@ abstract class HistoryDatabase : RoomDatabase() {
 
         fun destroyInstance() {
             INSTANCE = null
+        }
+    }
+
+    fun loadHistory(): ArrayList<String> {
+        val list = ArrayList<String>()
+        val history = searchRequestDao().getAll()
+        for (h: SearchRequest in history) {
+            val c: String? = h.content
+            c ?: continue
+            list.add(c)
+        }
+        return list
+    }
+
+    fun insertHistory(text: String) {
+        val searchRequest = SearchRequest()
+        searchRequest.content = text
+        findAndRemove(text)
+        searchRequestDao().insert(searchRequest)
+    }
+
+    fun findAndRemove(text: String) {
+        val sameStuff = searchRequestDao().getSame(text)
+        if (sameStuff.isNotEmpty()) {
+            for (sameRequest in sameStuff) {
+                searchRequestDao().remove(sameRequest)
+            }
         }
     }
 }

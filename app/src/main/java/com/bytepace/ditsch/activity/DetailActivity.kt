@@ -23,23 +23,23 @@ import java.util.*
 class DetailActivity : AppCompatActivity() {
 
     companion object {
-        const val ArgSourceText = "arg_source_text"
-        const val ArgChainSize = "arg_chain_size"
+        private const val ARG_SOURCE_TEXT = "arg_source_text"
+        private const val ARG_CHAIN_SIZE = "arg_chain_size"
         fun getIntent(ctx: Context, source_text: String, chain_size: Int): Intent {
             val intent = Intent(ctx, DetailActivity::class.java)
-            intent.putExtra(ArgSourceText, source_text)
-            intent.putExtra(ArgChainSize, chain_size)
+            intent.putExtra(ARG_SOURCE_TEXT, source_text)
+            intent.putExtra(ARG_CHAIN_SIZE, chain_size)
             return intent
         }
     }
 
-    val currentLocale = Locale.getDefault().language
+    private val currentLocale = Locale.getDefault().language
 
-    lateinit var translatedText: TextView
-    lateinit var sourceText: TextView
-    lateinit var progress: ProgressBar
-    lateinit var frame: FrameLayout
-    lateinit var swipeToRefresh: SwipeRefreshLayout
+    private lateinit var translatedText: TextView
+    private lateinit var sourceText: TextView
+    private lateinit var progress: ProgressBar
+    private lateinit var frame: FrameLayout
+    private lateinit var swipeToRefresh: SwipeRefreshLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,31 +52,35 @@ class DetailActivity : AppCompatActivity() {
         setupSourceText()
         setupSwipeToRefresh()
 
-        translateStringAndShowIt(intent.getStringExtra(ArgSourceText), intent.getIntExtra(ArgChainSize, 4))
+        translateStringAndShowIt(intent.getStringExtra(ARG_SOURCE_TEXT), intent.getIntExtra(ARG_CHAIN_SIZE, 4))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
     private fun setupSwipeToRefresh() {
         swipeToRefresh = findViewById(R.id.swipe_to_refresh)
         swipeToRefresh.setOnRefreshListener {
-            swipeToRefresh.isRefreshing = true
-            progress.visibility = View.VISIBLE
-            AnimUtils().animateViewFadeOut(translatedText, 300)
-            updateTranslation()
+            refreshTranslation()
         }
         swipeToRefresh.setOnChildScrollUpCallback({ parent, child ->
             child?.canScrollVertically(-1) ?: false
         })
     }
 
+    private fun refreshTranslation() {
+        swipeToRefresh.isRefreshing = true
+        progress.visibility = View.VISIBLE
+        AnimUtils().animateViewFadeOut(translatedText, 300)
+        updateTranslation()
+    }
+
     private fun setupSourceText() {
         sourceText = findViewById(R.id.source_text)
-        sourceText.text = intent.getStringExtra(ArgSourceText)
+        sourceText.text = intent.getStringExtra(ARG_SOURCE_TEXT)
         AnimUtils().animateViewFadeIn(sourceText)
     }
 
     private fun updateTranslation(): Boolean {
-        translateStringAndShowIt(intent.getStringExtra(ArgSourceText), intent.getIntExtra(ArgChainSize, 4))
+        translateStringAndShowIt(intent.getStringExtra(ARG_SOURCE_TEXT), intent.getIntExtra(ARG_CHAIN_SIZE, 4))
         return true
     }
 
@@ -86,12 +90,16 @@ class DetailActivity : AppCompatActivity() {
         Thread({
             val result = RandomTranslator().makeRandomTranslateChain(toTranslate, chain_size, currentLocale)
             handler.post {
-                translatedText.text = result
-                AnimUtils().animateViewFadeIn(translatedText)
-                progress.visibility = View.INVISIBLE
-                swipeToRefresh.isRefreshing = false
+                showText(result)
             }
         }).start()
+    }
+
+    private fun showText(text: String) {
+        translatedText.text = text
+        AnimUtils().animateViewFadeIn(translatedText)
+        progress.visibility = View.INVISIBLE
+        swipeToRefresh.isRefreshing = false
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

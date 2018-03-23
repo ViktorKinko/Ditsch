@@ -7,6 +7,7 @@ import java.util.*
  * Created by Viktor on 15.03.2018.
  */
 class RandomTranslator {
+    private val translateAPI = YandexTranslateApiImpl()
     private val allLangs = arrayOf("am", "ar", "hy", "bn", "az", "ml", "sq", "mt", "mk", "en", "mi",
             "mr", "mhr", "af", "mn", "eu", "de", "ba", "ne", "be", "no", "bn", "pa", "my", "pap",
             "bg", "fa", "bs", "pl", "cy", "pt", "hu", "ro", "vi", "ht", "ceb", "gl", "sr", "nl",
@@ -22,12 +23,15 @@ class RandomTranslator {
             "en"
         }
         val langChain = createRandomLangChain(chainLength)
-        val translateAPI = YandexTranslateApiImpl()
-        var result = translateAPI.translate(sourceText, "$startLang-${langChain[0]}")
+        var result = translateString(sourceText, startLang, langChain[0])
         for (i in 0 until chainLength) {
-            result = translateAPI.translate(result, "${langChain[i]}-${langChain[i + 1]}")
+            result = translateString(result, langChain[i], langChain[i + 1])
         }
-        return translateAPI.translate(result, "${langChain.last()}-$startLang")
+        return translateString(result, langChain.last(), startLang)
+    }
+
+    private fun translateString(text: String, startLanguage: String, endLanguage:String): String{
+        return translateAPI.translate(text, "$startLanguage-${endLanguage}")
     }
 
     private fun createRandomLangChain(chainLength: Int): ArrayList<String> {

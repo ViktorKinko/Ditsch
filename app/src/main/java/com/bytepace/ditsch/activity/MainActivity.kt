@@ -14,7 +14,6 @@ import android.widget.SeekBar
 import com.bytepace.ditsch.R
 import com.bytepace.ditsch.adapter.TranslateHistoryAdapter
 import com.bytepace.ditsch.database.HistoryDatabase
-import com.bytepace.ditsch.database.SearchRequest
 import com.bytepace.ditsch.utils.AnimUtils
 import com.bytepace.ditsch.utils.RandStr
 
@@ -28,6 +27,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
 
     private lateinit var adapter: TranslateHistoryAdapter
+
+    private val historyDatabase = HistoryDatabase.getInstance(this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,15 +49,14 @@ class MainActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true)
         layoutManager.stackFromEnd = true
         recyclerView.layoutManager = layoutManager
-        adapter = TranslateHistoryAdapter(loadHistory(), object : TranslateHistoryAdapter.Callback{
+
+        adapter = TranslateHistoryAdapter(historyDatabase.loadHistory(), object : TranslateHistoryAdapter.Callback {
             override fun onOpen(string: String) {
                 edit_text.setText(string)
             }
 
             override fun onRemove(string: String) {
-                findAndRemove(string)
-                adapter.refreshItems(loadHistory())
-                adapter.notifyDataSetChanged()
+                removeItemFromList(string)
             }
         })
 
@@ -64,37 +64,16 @@ class MainActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
     }
 
-    private fun loadHistory(): ArrayList<String> {
-        val list = ArrayList<String>()
-        val history = HistoryDatabase.getInstance(this).searchRequestDao().getAll()
-        for (h: SearchRequest in history) {
-            val c: String? = h.content
-            c ?: continue
-            list.add(c)
-        }
-        return list
-    }
-
-    private fun insertHistory(text: String) {
-        val searchRequest = SearchRequest()
-        searchRequest.content = text
-        findAndRemove(text)
-        HistoryDatabase.getInstance(this).searchRequestDao().insert(searchRequest)
-    }
-
-    private fun findAndRemove(text: String){
-        val sameStuff = HistoryDatabase.getInstance(this).searchRequestDao().getSame(text)
-        if (sameStuff.isNotEmpty()) {
-            for (sameRequest in sameStuff) {
-                HistoryDatabase.getInstance(this).searchRequestDao().remove(sameRequest)
-            }
-        }
+    fun removeItemFromList(string: String) {
+        historyDatabase.findAndRemove(string)
+        adapter.refreshItems(historyDatabase.loadHistory())
+        adapter.notifyDataSetChanged()
     }
 
     private fun onTranslateBtnClick() {
         AnimUtils().animateViewFadeOut(edit_text, 300, onCompleteCallback = {
             val text: String = prepareText()
-            insertHistory(text)
+            historyDatabase.insertHistory(text)
             startDetailActivity(text, prepareAnimation())
         })
     }
@@ -129,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         edit_text.alpha = 1f
-        adapter.refreshItems(loadHistory())
+        adapter.refreshItems(historyDatabase.loadHistory())
         adapter.notifyDataSetChanged()
         super.onResume()
     }
