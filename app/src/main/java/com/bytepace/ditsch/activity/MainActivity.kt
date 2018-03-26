@@ -16,6 +16,9 @@ import com.bytepace.ditsch.adapter.TranslateHistoryAdapter
 import com.bytepace.ditsch.database.HistoryDatabase
 import com.bytepace.ditsch.utils.AnimUtils
 import com.bytepace.ditsch.utils.RandStr
+import com.jakewharton.rxbinding2.widget.RxTextView
+import io.reactivex.android.schedulers.AndroidSchedulers
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         btn_go = findViewById(R.id.btn_go)
-        edit_text = findViewById(R.id.edit_text)
+
         seek_bar = findViewById(R.id.seek_bar)
         frame = findViewById(R.id.frame)
 
@@ -42,6 +45,17 @@ class MainActivity : AppCompatActivity() {
             onTranslateBtnClick()
         })
         initList()
+        initEditText()
+    }
+
+    private fun initEditText() {
+        edit_text = findViewById(R.id.edit_text)
+        RxTextView.afterTextChangeEvents(edit_text)
+                .debounce(650, TimeUnit.MILLISECONDS)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    adapter.filter(it.view().text.toString())
+                }
     }
 
     private fun initList() {
