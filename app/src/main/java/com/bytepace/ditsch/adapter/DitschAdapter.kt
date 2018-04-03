@@ -17,8 +17,8 @@ class DitschAdapter(private val callback: (String) -> Unit) : RecyclerView.Adapt
         this.strings.addAll(strings)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent?.context).inflate(R.layout.list_item, parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item, parent, false)
         return ViewHolder(view, callback)
     }
 
@@ -26,8 +26,7 @@ class DitschAdapter(private val callback: (String) -> Unit) : RecyclerView.Adapt
         return strings.size
     }
 
-    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        holder ?: return
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(strings[position])
     }
 

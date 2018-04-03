@@ -12,12 +12,16 @@ import com.bytepace.ditsch.R
  * Created by Viktor on 19.03.2018.
  */
 class TranslateHistoryAdapter(private var strings: ArrayList<String>, private val callback: Callback) : RecyclerView.Adapter<TranslateHistoryAdapter.ViewHolder>() {
-    var list: List<String> = strings
-
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent?.context).inflate(R.layout.list_item, parent, false)
         return TranslateHistoryAdapter.ViewHolder(view, callback)
     }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.bind(list[position])
+    }
+
+    var list: List<String> = strings
 
     override fun getItemCount(): Int {
         return list.size
@@ -34,11 +38,6 @@ class TranslateHistoryAdapter(private var strings: ArrayList<String>, private va
             it.contains(filter)
         }
         notifyDataSetChanged()
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        holder ?: return
-        holder.bind(list[position])
     }
 
     class ViewHolder(itemView: View?, private val callback: Callback) : RecyclerView.ViewHolder(itemView) {
