@@ -2,16 +2,19 @@ package com.bytepace.ditsch.activity
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.provider.Settings
+import android.support.annotation.RequiresApi
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import com.bytepace.ditsch.R
+import com.bytepace.ditsch.service.OverlayService
 import com.bytepace.ditsch.utils.AnimUtils
 import com.bytepace.ditsch.utils.RandomTranslator
 import java.util.*
@@ -20,6 +23,9 @@ import java.util.*
 /**
  * Created by Viktor on 16.03.2018.
  */
+
+const val CODE_DRAW_OVER_OTHER_APP_PERMISSION = 100
+
 class DetailActivity : AppCompatActivity() {
 
     companion object {
@@ -51,9 +57,17 @@ class DetailActivity : AppCompatActivity() {
 
         setupSourceText()
         setupSwipeToRefresh()
+        setupServiceButtons()
+
+        OverlayService.startService(this)
 
         translateStringAndShowIt(intent.getStringExtra(ARG_SOURCE_TEXT), intent.getIntExtra(ARG_CHAIN_SIZE, 4))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+
+    override fun onDestroy() {
+        OverlayService.stopService(this)
+        super.onDestroy()
     }
 
     private fun setupSwipeToRefresh() {
@@ -109,6 +123,36 @@ class DetailActivity : AppCompatActivity() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun setupServiceButtons() {
+        findViewById<Button>(R.id.btn_show).setOnClickListener({
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.canDrawOverlays(this)) {
+                askPermission()
+            } else {
+                OverlayService.showBubble(this, translatedText.text.toString())
+            }
+        })
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun askPermission() {
+        val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
+        startActivityForResult(intent, CODE_DRAW_OVER_OTHER_APP_PERMISSION)
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (requestCode == CODE_DRAW_OVER_OTHER_APP_PERMISSION) {
+            if (Settings.canDrawOverlays(this)) {
+                OverlayService.showBubble(this, translatedText.text.toString())
+            } else {
+                Toast.makeText(this, "Draw over other app permission not available. Closing the application", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 }

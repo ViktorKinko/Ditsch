@@ -52,9 +52,9 @@
                 android:id="@+id/translated_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_marginLeft="20dp"
                 android:layout_marginRight="20dp"
+                android:layout_marginTop="10dp"
                 android:gravity="center_horizontal"
                 android:maxLines="20"
                 android:minLines="1"
@@ -67,6 +67,27 @@
         </android.support.v4.widget.NestedScrollView>
 
     </android.support.v4.widget.SwipeRefreshLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/progress"
+        android:orientation="horizontal"
+        android:paddingBottom="3dp"
+        android:paddingTop="3dp">
+
+        <Button
+            android:id="@+id/btn_show"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/background_rounded_light"
+            android:text="@string/show_service" />
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/progress"

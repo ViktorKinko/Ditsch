@@ -5,4 +5,6 @@
     <string name="chain_size">Размер цепи переводов</string>
     <string name="transition_main_to_detail">main to detail</string>
     <string name="delete">Delete</string>
+    <string name="hide_service">Скрыть окно</string>
+    <string name="show_service">Показать окно</string>
 </resources>
