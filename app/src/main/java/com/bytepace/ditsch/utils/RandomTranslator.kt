@@ -1,5 +1,6 @@
 package com.bytepace.ditsch.utils
 
+import com.bytepace.ditsch.model.TranslationResult
 import com.bytepace.ditsch.network.YandexTranslateApiImpl
 import java.util.*
 
@@ -30,8 +31,12 @@ class RandomTranslator {
         return translateString(result, langChain.last(), startLang)
     }
 
-    private fun translateString(text: String, startLanguage: String, endLanguage:String): String{
-        return translateAPI.translate(text, "$startLanguage-${endLanguage}")
+    private fun translateString(text: String, startLanguage: String, endLanguage: String): String {
+        val result = translateAPI.translate(text, "$startLanguage-$endLanguage")
+        return when (result) {
+            is TranslationResult.ParsedData -> result.data[0]
+            is TranslationResult.Error -> result.errorMessage
+        }
     }
 
     private fun createRandomLangChain(chainLength: Int): ArrayList<String> {

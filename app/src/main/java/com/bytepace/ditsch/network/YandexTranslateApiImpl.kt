@@ -1,6 +1,7 @@
 package com.bytepace.ditsch.network
 
 import com.bytepace.ditsch.model.Translation
+import com.bytepace.ditsch.model.TranslationResult
 import retrofit2.Call
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -17,14 +18,14 @@ class YandexTranslateApiImpl {
             .build()
     private var api: YandexTranslateApi = retrofit.create(YandexTranslateApi::class.java)
 
-    fun translate(text: String, lang: String): String {
+    fun translate(text: String, lang: String): TranslationResult {
         val call: Call<Translation> = api.translate(API_KEY, lang, text)
         val t: Translation = execute(call)
-        t.text ?: return "No response"
+        t.text ?: return TranslationResult.Error("No response")
         return if (t.text.size == 0) {
-            return "No translation"
+            TranslationResult.Error("No translation")
         } else {
-            t.text[0]
+            TranslationResult.ParsedData(t.text.toTypedArray())
         }
     }
 
